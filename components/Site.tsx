@@ -113,11 +113,6 @@ export default function Site() {
         <div className="sectionKicker">02 / MENU</div>
         <div className="menuHead"><h2>Kuchnia włoska,<br /><em>po naszemu.</em></h2><span>40–60 zł / osoba</span></div>
         <div className="menuItems">{menu.map(item => <article className="menuItem" key={item.id}><div className="menuItemImage"><Image src={item.image} alt={item.name} fill sizes="(max-width: 800px) 100vw, 33vw" /></div><div className="menuItemBody"><div><h3>{item.name}</h3><strong>{item.price}</strong></div><p>{item.description}</p></div></article>)}</div>
-        <div className="menuCards">
-          <article><span>01</span><h3>Pizza</h3><p>Klasyczne włoskie inspiracje, chrupiące ciasto i składniki, które robią różnicę.</p></article>
-          <article><span>02</span><h3>Makaron</h3><p>Prosto, intensywnie i bez zbędnych dodatków. Komfortowe dania na dobry wieczór.</p></article>
-          <article><span>03</span><h3>Deser</h3><p>Tiramisu i słodkie zakończenie spotkania. Bo ostatni kęs też powinien zostać w pamięci.</p></article>
-        </div>
       </section>
 
       <section className="quote"><p>„Bardzo dobre jedzenie, ładny lokal i miła obsługa.”</p><span>— opinia gościa</span></section>
