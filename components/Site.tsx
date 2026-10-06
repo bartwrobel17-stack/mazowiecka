@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 
 type Photo = { id: string; src: string; alt: string; size: "wide" | "tall" | "normal" };
+type MenuItem = { id: string; name: string; description: string; price: string; image: string };
 
 const initialPhotos: Photo[] = [
   { id: "1", src: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1400&q=85", alt: "Eleganckie wnętrze restauracji", size: "wide" },
@@ -14,6 +15,12 @@ const initialPhotos: Photo[] = [
   { id: "6", src: "https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=900&q=85", alt: "Stół w restauracji", size: "normal" }
 ];
 
+const initialMenu: MenuItem[] = [
+  { id: "m1", name: "Pizza Margherita", description: "San Marzano, mozzarella, bazylia i oliwa extra virgin.", price: "32 zł", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=85" },
+  { id: "m2", name: "Pasta al Pomodoro", description: "Makaron, dojrzałe pomidory, czosnek, bazylia i parmezan.", price: "34 zł", image: "https://images.unsplash.com/photo-1551892374-ecf8754cf8b0?auto=format&fit=crop&w=900&q=85" },
+  { id: "m3", name: "Tiramisu", description: "Klasyczny włoski deser z mascarpone, kawą i kakao.", price: "22 zł", image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=900&q=85" }
+];
+
 const reviews = [
   { name: "xd xd", text: "Bardzo dobre jedzenie, ładny lokal i miła obsługa. Jedzenie ładnie podane i co najważniejsze smaczne, porcje solidne.", stars: 5 },
   { name: "Magdalena Piasecka", text: "Bardzo fajne miejsce z dobrym jedzeniem. Sympatyczna obsługa, pyszny schabowy i ciekawe drinki.", stars: 5 },
@@ -21,6 +28,10 @@ const reviews = [
 ];
 
 export default function Site() {
+  const [menu, setMenu] = useState<MenuItem[]>(() => {
+    if (typeof window === "undefined") return initialMenu;
+    try { return JSON.parse(localStorage.getItem("mazowiecka-menu") || "null") || initialMenu; } catch { return initialMenu; }
+  });
   const [photos, setPhotos] = useState<Photo[]>(() => {
     if (typeof window === "undefined") return initialPhotos;
     try { return JSON.parse(localStorage.getItem("mazowiecka-gallery") || "null") || initialPhotos; } catch { return initialPhotos; }
@@ -30,6 +41,30 @@ export default function Site() {
   const [logged, setLogged] = useState(false);
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState("");
+
+  const saveMenu = (next: MenuItem[]) => {
+    setMenu(next);
+    localStorage.setItem("mazowiecka-menu", JSON.stringify(next));
+  };
+
+  const addMenuItem = () => {
+    const name = window.prompt("Nazwa dania:");
+    if (!name) return;
+    const description = window.prompt("Opis dania:") || "";
+    const price = window.prompt("Cena, np. 39 zł:") || "";
+    const image = window.prompt("Bezpośredni adres HTTPS zdjęcia:") || "";
+    if (!image.startsWith("https://")) return;
+    saveMenu([...menu, { id: crypto.randomUUID(), name, description, price, image }]);
+  };
+
+  const editMenuItem = (item: MenuItem) => {
+    const name = window.prompt("Nazwa dania:", item.name);
+    if (!name) return;
+    const description = window.prompt("Opis dania:", item.description) || "";
+    const price = window.prompt("Cena:", item.price) || "";
+    const image = window.prompt("Adres HTTPS zdjęcia:", item.image) || item.image;
+    saveMenu(menu.map(x => x.id === item.id ? { ...x, name, description, price, image } : x));
+  };
 
   const savePhotos = (next: Photo[]) => {
     setPhotos(next);
@@ -77,6 +112,7 @@ export default function Site() {
       <section className="menuSection section" id="menu">
         <div className="sectionKicker">02 / MENU</div>
         <div className="menuHead"><h2>Kuchnia włoska,<br /><em>po naszemu.</em></h2><span>40–60 zł / osoba</span></div>
+        <div className="menuItems">{menu.map(item => <article className="menuItem" key={item.id}><div className="menuItemImage"><Image src={item.image} alt={item.name} fill sizes="(max-width: 800px) 100vw, 33vw" /></div><div className="menuItemBody"><div><h3>{item.name}</h3><strong>{item.price}</strong></div><p>{item.description}</p></div></article>)}</div>
         <div className="menuCards">
           <article><span>01</span><h3>Pizza</h3><p>Klasyczne włoskie inspiracje, chrupiące ciasto i składniki, które robią różnicę.</p></article>
           <article><span>02</span><h3>Makaron</h3><p>Prosto, intensywnie i bez zbędnych dodatków. Komfortowe dania na dobry wieczór.</p></article>
@@ -105,7 +141,8 @@ export default function Site() {
 
       {lightbox !== null && current && <div className="lightbox" role="dialog" aria-modal="true" onClick={() => setLightbox(null)}><button className="close" onClick={() => setLightbox(null)}>×</button><button className="prev" onClick={e => { e.stopPropagation(); setLightbox((lightbox - 1 + photos.length) % photos.length); }}>‹</button><div className="lightImage" onClick={e => e.stopPropagation()}><Image src={current.src} alt={current.alt} fill sizes="100vw" /></div><button className="next" onClick={e => { e.stopPropagation(); setLightbox((lightbox + 1) % photos.length); }}>›</button></div>}
 
-      {owner && <div className="modalBackdrop" onClick={() => setOwner(false)}><div className="ownerModal" onClick={e => e.stopPropagation()}><button className="modalClose" onClick={() => setOwner(false)}>×</button>{!logged ? <><div className="sectionKicker">PANEL WŁAŚCICIELA</div><h2>Zarządzaj galerią.</h2><p>Demo lokalne: logowanie i galeria działają w tej przeglądarce. Docelowo moduł można podpiąć do Supabase Storage/Auth.</p><input value={password} onChange={e => setPassword(e.target.value)} placeholder="Hasło demonstracyjne" type="password" /><button className="button buttonDark full" onClick={() => { if(password === "mazowiecka-demo") setLogged(true); else setNotice("Hasło demonstracyjne: mazowiecka-demo"); }}>{notice || "Zaloguj się"}</button></> : <><div className="ownerTop"><div><div className="sectionKicker">PANEL WŁAŚCICIELA</div><h2>Galeria</h2></div><button className="button buttonDark" onClick={addPhoto}>+ Dodaj zdjęcie</button></div><p className="demoNote">Tryb demonstracyjny. Zdjęcia są zapisywane w localStorage tej przeglądarki.</p><div className="ownerGrid">{photos.map((p,i)=><div className="ownerPhoto" key={p.id}><Image src={p.src} alt={p.alt} fill sizes="160px" /><button onClick={() => savePhotos(photos.filter(x => x.id !== p.id))}>Usuń</button><span>#{i+1}</span></div>)}</div></>}</div></div>}
+      {owner && <div className="modalBackdrop" onClick={() => setOwner(false)}><div className="ownerModal" onClick={e => e.stopPropagation()}><button className="modalClose" onClick={() => setOwner(false)}>×</button>{!logged ? <><div className="sectionKicker">PANEL WŁAŚCICIELA</div><h2>Zarządzaj stroną.</h2><p>Demo lokalne: logowanie i galeria działają w tej przeglądarce. Docelowo moduł można podpiąć do Supabase Storage/Auth.</p><input value={password} onChange={e => setPassword(e.target.value)} placeholder="Hasło demonstracyjne" type="password" /><button className="button buttonDark full" onClick={() => { if(password === "mazowiecka-demo") setLogged(true); else setNotice("Hasło demonstracyjne: mazowiecka-demo"); }}>{notice || "Zaloguj się"}</button></> : <><div className="ownerTop"><div><div className="sectionKicker">PANEL WŁAŚCICIELA</div><h2>Galeria i menu</h2></div></div>
+          <div className="ownerSection"><div className="ownerTop"><h3>Galeria</h3><button className="button buttonDark" onClick={addPhoto}>+ Dodaj zdjęcie</button></div><p className="demoNote">Zdjęcia galerii są niezależne od menu.</p><div className="ownerGrid">{photos.map((p,i)=><div className="ownerPhoto" key={p.id}><Image src={p.src} alt={p.alt} fill sizes="160px" /><button onClick={() => savePhotos(photos.filter(x => x.id !== p.id))}>Usuń</button><span>#{i+1}</span></div>)}</div></>}</div></div>}
     </main>
   );
 }
