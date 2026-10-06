@@ -79,6 +79,7 @@ export default function Site() {
     setNotice("Zdjęcie dodane. W wersji demonstracyjnej zapis jest lokalny w tej przeglądarce.");
   };
 
+  const heroImage = "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=2200&q=90";
   const directions = "https://www.google.com/maps/dir/?api=1&destination=Aleja+Stanis%C5%82awa+Jachowicza+49%2C+09-400+P%C5%82ock";
   const mapSrc = "https://www.google.com/maps?q=Aleja+Stanis%C5%82awa+Jachowicza+49,+09-400+P%C5%82ock&output=embed";
 
