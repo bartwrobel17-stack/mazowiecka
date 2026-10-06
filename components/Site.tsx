@@ -141,8 +141,74 @@ export default function Site() {
 
       {lightbox !== null && current && <div className="lightbox" role="dialog" aria-modal="true" onClick={() => setLightbox(null)}><button className="close" onClick={() => setLightbox(null)}>×</button><button className="prev" onClick={e => { e.stopPropagation(); setLightbox((lightbox - 1 + photos.length) % photos.length); }}>‹</button><div className="lightImage" onClick={e => e.stopPropagation()}><Image src={current.src} alt={current.alt} fill sizes="100vw" /></div><button className="next" onClick={e => { e.stopPropagation(); setLightbox((lightbox + 1) % photos.length); }}>›</button></div>}
 
-      {owner && <div className="modalBackdrop" onClick={() => setOwner(false)}><div className="ownerModal" onClick={e => e.stopPropagation()}><button className="modalClose" onClick={() => setOwner(false)}>×</button>{!logged ? <><div className="sectionKicker">PANEL WŁAŚCICIELA</div><h2>Zarządzaj stroną.</h2><p>Demo lokalne: logowanie i galeria działają w tej przeglądarce. Docelowo moduł można podpiąć do Supabase Storage/Auth.</p><input value={password} onChange={e => setPassword(e.target.value)} placeholder="Hasło demonstracyjne" type="password" /><button className="button buttonDark full" onClick={() => { if(password === "mazowiecka-demo") setLogged(true); else setNotice("Hasło demonstracyjne: mazowiecka-demo"); }}>{notice || "Zaloguj się"}</button></> : <><div className="ownerTop"><div><div className="sectionKicker">PANEL WŁAŚCICIELA</div><h2>Galeria i menu</h2></div></div>
-          <div className="ownerSection"><div className="ownerTop"><h3>Galeria</h3><button className="button buttonDark" onClick={addPhoto}>+ Dodaj zdjęcie</button></div><p className="demoNote">Zdjęcia galerii są niezależne od menu.</p><div className="ownerGrid">{photos.map((p,i)=><div className="ownerPhoto" key={p.id}><Image src={p.src} alt={p.alt} fill sizes="160px" /><button onClick={() => savePhotos(photos.filter(x => x.id !== p.id))}>Usuń</button><span>#{i+1}</span></div>)}</div></>}</div></div>}
+      {owner && <div className="modalBackdrop" onClick={() => setOwner(false)}>
+        <div className="ownerModal" onClick={e => e.stopPropagation()}>
+          <button className="modalClose" onClick={() => setOwner(false)}>×</button>
+          {!logged ? (
+            <>
+              <div className="sectionKicker">PANEL WŁAŚCICIELA</div>
+              <h2>Zarządzaj stroną.</h2>
+              <p>Demo lokalne: logowanie, galeria i menu zapisują się osobno w tej przeglądarce. Docelowo moduł można podpiąć do Supabase Storage/Auth.</p>
+              <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Hasło demonstracyjne" type="password" />
+              <button className="button buttonDark full" onClick={() => { if (password === "mazowiecka-demo") { setLogged(true); setNotice(""); } else setNotice("Hasło demonstracyjne: mazowiecka-demo"); }}>
+                {notice || "Zaloguj się"}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="ownerTop">
+                <div>
+                  <div className="sectionKicker">PANEL WŁAŚCICIELA</div>
+                  <h2>Galeria i menu</h2>
+                </div>
+              </div>
+
+              <div className="ownerSection">
+                <div className="ownerTop">
+                  <h3>Galeria</h3>
+                  <button className="button buttonDark" onClick={addPhoto}>+ Dodaj zdjęcie</button>
+                </div>
+                <p className="demoNote">Galeria jest niezależna od menu. Zmiany nie wpływają na pozycje menu.</p>
+                <div className="ownerGrid">
+                  {photos.map((p, i) => (
+                    <div className="ownerPhoto" key={p.id}>
+                      <Image src={p.src} alt={p.alt} fill sizes="160px" />
+                      <button onClick={() => savePhotos(photos.filter(x => x.id !== p.id))}>Usuń</button>
+                      <span>#{i + 1}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="ownerSection">
+                <div className="ownerTop">
+                  <h3>Menu</h3>
+                  <button className="button buttonDark" onClick={addMenuItem}>+ Dodaj pozycję</button>
+                </div>
+                <p className="demoNote">Menu ma osobną bazę lokalną. Każda pozycja może mieć zdjęcie, opis i cenę.</p>
+                <div className="ownerMenuList">
+                  {menu.map(item => (
+                    <div className="ownerMenuRow" key={item.id}>
+                      <div className="ownerMenuImage">
+                        <Image src={item.image} alt={item.name} fill sizes="100px" />
+                      </div>
+                      <div className="ownerMenuInfo">
+                        <strong>{item.name}</strong>
+                        <span>{item.description}</span>
+                        <b>{item.price}</b>
+                      </div>
+                      <div className="ownerActions">
+                        <button onClick={() => editMenuItem(item)}>Edytuj</button>
+                        <button onClick={() => saveMenu(menu.filter(x => x.id !== item.id))}>Usuń</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>}
     </main>
   );
 }
